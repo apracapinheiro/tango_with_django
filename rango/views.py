@@ -7,4 +7,9 @@ from django.shortcuts import render
 
 
 def index(request):
-    return HttpResponse("Rango says!" )
+    """Constroi um dicionario para passar para o template o contexto"""
+    context_dict = {'boldmessage': "Crunchy, creamy, cookie, candy, cupcake!"}
+    return render(request, 'rango/index.html', context=context_dict)
+
+def about(request):
+    return HttpResponse("Rango about <br> <a href='/rango/'>Index</a>")
