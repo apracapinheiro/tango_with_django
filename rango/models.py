@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import unicode_literals
+
+from django.contrib.auth.models import User
 from django.template.defaultfilters import slugify
 from django.db import models
 
@@ -35,3 +37,14 @@ class Page(models.Model):
         
     def __unicode__(self):
         return self.title
+
+
+class UserProfile(models.Model):
+    #  Esta linha é necessária. Linka o UserProfile com uma instancia do model User
+    user = models.OneToOneField(User)
+
+    website = models.URLField(blank=True)
+    picture = models.ImageField(upload_to='profiles_images', blank=True)
+
+    def __unicode__(self):
+        return self.user.username
