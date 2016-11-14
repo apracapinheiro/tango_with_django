@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+from datetime import datetime
 
 from .models import Page, Category
 from .forms import CategoryForm, PageForm, UserForm, UserProfileForm
@@ -16,16 +18,53 @@ def index(request):
     """Constroi um dicionario para passar para o template o contexto"""
     # A query retorna a lista de categorias ordenada pela qtde de likes em ordem descendente, retorna
     # somente as 5 primeiras categorias
+    # request.session.set_test_cookie()
     category_list = Category.objects.order_by('-likes')[:5]
-    context_dict = {'categories': category_list}
-    return render(request, 'rango/index.html', context=context_dict)
+    page_list = Page.objects.order_by('-views')[:5]
+    context_dict = {'categories': category_list, 'pages': page_list}
+
+    # visitor_cookie_handler(request)
+    # context_dict['visits'] = request.session['visits']
+    # print(request.session['visits'])
+
+    response = render(request, 'rango/index.html', context=context_dict)
+
+    return response
 
 
 def about(request):
-    print (request.method)
-    print (request.user)
-    return render(request, 'rango/about.html', {})
+    # if request.session.test_cookie_worked():
+    #     print("TEST COOKIE WORKED!")
+    #     request.session.delete_test_cookie()
+    # To complete the exercise in chapter 4, we need to remove the following line
+    return HttpResponse("Rango says here is the about page. <a href='/rango/'>View index page</a>")
 
+    # and replace it with a pointer to ther about.html template using the render method
+    # return render(request, 'rango/about.html', {})
+
+
+# def visitor_cookie_handler(request, response):
+#     # Pega o numero de visitas do site
+#     # será usado a funcão COOKIES.get() para obter o cookie de visitas.
+#     # se o cookie existe, o valor retornado é fundido em um inteiro
+#     # se o cookie não existe, então o valor default 1 é usado.
+#     visits = int(request.COOKIES.get('visits', '1'))
+#
+#     last_visit_cookie = request.COOKIES.get('last_visit', str(datetime.now()))
+#     last_visit_time = datetime.strptime(last_visit_cookie[:-7], '%Y-%m-%d %H:%M:%S')
+#
+#     # se tiver passado mais de um dia desde a ultima visita
+#     if (datetime.now() - last_visit_time).days > 0:
+#         visits = visits + 1
+#         # atualiza o cookie de ultima visita agora que o contador foi atualizado
+#         response.set_cookie('last_visit', str(datetime.now()))
+#     else:
+#         visits = 1
+#         # seta o cookie last visit
+#         response.set_cookie('last_visit', last_visit_cookie)
+#
+#     # atualiza/seta o cookie visits
+#     response.set_cookie('visits', visits)
 
 def show_category(request, category_name_slug):
     """Cria um dicionario de contexto que será passado para o template"""
@@ -48,6 +87,7 @@ def show_category(request, category_name_slug):
     return render(request, 'rango/category.html', context_dict)
 
 
+@login_required
 def add_category(request):
     form = CategoryForm()
 
@@ -63,6 +103,7 @@ def add_category(request):
     return render(request, 'rango/add_category.html', {'form': form})
 
 
+@login_required
 def add_page(request, category_name_slug):
     try:
         category = Category.objects.get(slug=category_name_slug)
@@ -146,3 +187,14 @@ def user_login(request):
 
     else:
         return render(request, 'rango/login.html', {})
+
+
+@login_required
+def restricted(request):
+    return render(request, 'rango/restricted.html', {})
+
+
+@login_required
+def user_logout(request):
+    logout(request)
+    return HttpResponseRedirect(reverse('index'))
