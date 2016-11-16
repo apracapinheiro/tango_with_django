@@ -7,32 +7,48 @@
 
 
 {% block body_block %}
+    <div class="jumbotron">
+        <h1 class="display-3">Rango says...</h1>
 
-    <h1>Rango says...</h1>
-    <div>
-        {% if user.is_authenticated %}
-           <h1> Hello {{ user.username }} ! </h1>
-        {% else %}
-            Hey there!
-        {% endif %}
-        <strong>{{ boldmessage }}</strong><br/>
-    </div>
-
-    <div>
-        <h4>Most liked categories</h4>
-        <p>
-            {% if categories %}
-                <ul>
-                    {% for category in categories %}
-                        <li>
-                            <a href="{% url 'rango:show_category' category.slug %}">{{ category.name }}</a>
-                        </li>
-                    {% endfor %}
-                </ul>
+            {% if user.is_authenticated %}
+               <h1> Hello {{ user.username }} ! </h1>
             {% else %}
-                <strong>There are no categories present.</strong>
+                Hey there!
             {% endif %}
-        </p>
+            <strong>{{ boldmessage }}</strong><br/>
+    </div>
+    <div class="row marketing">
+        <div class="col-lg-6">
+            <h4>Most liked categories</h4>
+            <p>
+                {% if categories %}
+                    <ul class="list-group">
+                        {% for category in categories %}
+                            <li class="list-group-item">
+                                <a href="{% url 'rango:show_category' category.slug %}">{{ category.name }}</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <strong>There are no categories present.</strong>
+                {% endif %}
+            </p>
+        </div>
+
+        <div class="col-lg-6">
+            <h4>Most Viewed pages</h4>
+            <p>
+                {% if pages %}
+                    <ul class="list-group">
+                        {% for page in pages %}
+                            <li class="list-group-item"><a href="{{ page.url }}">{{ page.title }}</a></li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <strong>There no categories present.</strong>
+                {% endif %}
+            </p>
+        </div>
     </div>
 
     <img src="{% static "images/rango.jpg" %}" alt="Foto do Rango"/>
