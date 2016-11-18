@@ -12,12 +12,13 @@ def read_bing_key():
     bing_api_key = None
 
     try:
-        with open('bing.ket', 'r') as f:
+        with open('bing.key', 'r') as f:
             bing_api_key = f.readline()
     except:
         raise IOError('bing.key file not found')
 
     return bing_api_key
+
 
 def run_query(search_terms):
     """
@@ -45,7 +46,15 @@ def run_query(search_terms):
     query = "'{0}'".format(search_terms)
 
     # transforma a query em uma string HTML codificada usando urllib
-    query = urllib.quote(query)
+    # We use urllib for this - differences exist between Python 2 and 3.
+    # The try/except blocks are used to determine which function call works.
+    # Replace this try/except block with the relevant import and query assignment.
+    try:
+        from urllib import parse  # Python 3 import.
+        query = parse.quote(query)
+    except ImportError:  # If the import above fails, you are running Python 2.7.x.
+        from urllib import quote
+        query = quote(query)
 
     # contrói a última parte da requisição URL
     # seta o formato da resposta para JSON e seta outra propriedades
@@ -57,7 +66,12 @@ def run_query(search_terms):
     username = ''
 
     # configura o gerenciador de password para ajudar a autenticar a requisicao
-    password_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
+    try:
+        from urllib import request  # Python 3 import.
+        password_mgr = request.HTTPPasswordMgrWithDefaultRealm()
+    except ImportError:  # Running Python 2.7.x - import urllib2 instead.
+        import urllib2
+        password_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
 
     password_mgr.add_password(None, search_url, username, bing_api_key)
 
@@ -66,12 +80,21 @@ def run_query(search_terms):
 
     try:
         # prepara para conectar com os sevidores Bing
-        handler = urllib2.HTTPBasicAuthHandler(password_mgr)
-        opener = urllib2.build_opener(handler)
-        urllib2.install_opener(opener)
+        try:  # Python 3.5 and 3.6
+            handler = request.HTTPBasicAuthHandler(password_mgr)
+            opener = request.build_opener(handler)
+            request.install_opener(opener)
+        except UnboundLocalError:  # Python 2.7.x
+            handler = urllib2.HTTPBasicAuthHandler(password_mgr)
+            opener = urllib2.build_opener(handler)
+            urllib2.install_opener(opener)
 
         # conecta com o servidor e le a resposta gerada
-        response = urllib2.urlopen(search_url).read()
+        try:  # Python 3.5 or 3.6
+            response = request.urlopen(search_url).read()
+            response = response.decode('utf-8')
+        except UnboundLocalError:  # Python 2.7.x
+            response = urllib2.urlopen(search_url).read()
 
         # converte a string de resposta em um dicionario Python
         json_response = json.loads(response)

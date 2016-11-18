@@ -1,5 +1,6 @@
 {% extends 'rango/base.html' %}
 {% load staticfiles %}
+
 {% block title_block %}
     About
 {% endblock %}
@@ -13,7 +14,9 @@
 
     <hr>
 
-    <button class="btn btn-primary" id="about-btn"> JQuery Alert Example</button>
-    <p>This text is for a Jquery Example - I'll turn red when you hover over me.</p>
+    <button class="btn btn-primary" onclick="alert('You clicked the button using Javascript');">Click Me - I run Javascript</button>
+    <button class="btn btn-primary" id="about-btn">Click Me - I'm JavaScript on Speed</button>
+    <p>This is a example</p>
+    <p>This is another example</p>
     <div id="msg">Hello - I'm here for a Jquery Example too</div>
 {% endblock %}
